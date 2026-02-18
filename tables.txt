@@ -1,0 +1,140 @@
+-- Ecommerce database schema and sample data for class/workshop exercises.
+
+CREATE DATABASE ecommerce;
+
+USE ecommerce;
+
+-- Customers table:
+-- id: primary key, auto-increment
+-- customer_name: customer's full name (required)
+-- email: unique contact email (required)
+-- address: address (optional)
+
+CREATE TABLE customers (
+    id INT AUTO_INCREMENT PRIMARY KEY,     
+    customer_name VARCHAR(100) NOT NULL,             
+    email VARCHAR(100) UNIQUE NOT NULL,    
+    address VARCHAR(255)       
+);
+
+-- Sample DESCRIBE output for reference (shows column types and constraints)
+
+mysql> desc customers;
++---------------+--------------+------+-----+---------+----------------+
+| Field         | Type         | Null | Key | Default | Extra          |
++---------------+--------------+------+-----+---------+----------------+
+| id            | int          | NO   | PRI | NULL    | auto_increment |
+| customer_name | varchar(100) | NO   |     | NULL    |                |
+| email         | varchar(100) | NO   | UNI | NULL    |                |
+| address       | varchar(255) | YES  |     | NULL    |                |
++---------------+--------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+-- Products table:
+-- id: primary key, auto-increment
+-- product_name: name of the product (required)
+-- price: product price with 2 decimal places (required)
+-- product_description: longer text description (optional)
+
+CREATE TABLE products (
+    id INT AUTO_INCREMENT PRIMARY KEY,    
+    product_name VARCHAR(100) NOT NULL,           
+    price DECIMAL(10,2) NOT NULL,           
+    product_description TEXT 
+);
+
+-- Sample DESCRIBE output for products table
+mysql> desc products;
++---------------------+---------------+------+-----+---------+----------------+
+| Field               | Type          | Null | Key | Default | Extra          |
++---------------------+---------------+------+-----+---------+----------------+
+| id                  | int           | NO   | PRI | NULL    | auto_increment |
+| product_name        | varchar(100)  | NO   |     | NULL    |                |
+| price               | decimal(10,2) | NO   |     | NULL    |                |
+| product_description | text          | YES  |     | NULL    |                |
++---------------------+---------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+-- Orders table:
+
+-- id: primary key, auto-increment
+-- customer_id: foreign key referencing customers(id)
+-- order_date: date of the order
+-- total_amount: total order value
+CREATE TABLE orders (
+    id INT AUTO_INCREMENT PRIMARY KEY, 
+    customer_id INT, 
+    order_date DATE, 
+    total_amount DECIMAL(10,2), 
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+);
+
+-- Sample DESCRIBE output for orders table
+mysql> desc orders;
++--------------+---------------+------+-----+---------+----------------+
+| Field        | Type          | Null | Key | Default | Extra          |
++--------------+---------------+------+-----+---------+----------------+
+| id           | int           | NO   | PRI | NULL    | auto_increment |
+| customer_id  | int           | YES  | MUL | NULL    |                |
+| order_date   | date          | YES  |     | NULL    |                |
+| total_amount | decimal(10,2) | YES  |     | NULL    |                |
++--------------+---------------+------+-----+---------+----------------+
+4 rows in set (0.00 sec)
+
+-- Insert sample customers (note some addresses intentionally vary in capitalization/spelling)
+
+INSERT INTO customers (customer_name, email, address) VALUES
+('Alice', 'alice@example.com', '123 Main St channai'),
+('Bob', 'bob@example.com', '456 Market St Chennai'),
+('Charlie', 'charlie@example.com', '789 Broadway chennai');
+
+-- Sample SELECT output for customers
+mysql> select * from customers;
++----+---------------+---------------------+-----------------------+
+| id | customer_name | email               | address               |
++----+---------------+---------------------+-----------------------+
+|  1 | Alice         | alice@example.com   | 123 Main St channai   |
+|  2 | Bob           | bob@example.com     | 456 Market St Chennai |
+|  3 | Charlie       | charlie@example.com | 789 Broadway chennai  |
++----+---------------+---------------------+-----------------------+
+3 rows in set (0.00 sec)
+
+-- Insert sample products
+
+INSERT INTO products (product_name, price, product_description) VALUES
+('Product A', 30.00, 'Description of Product A'),
+('Product B', 60.00, 'Description of Product B'),
+('Product C', 40.00, 'Description of Product C'),
+('Product D', 120.00, 'Description of Product D');
+
+-- Sample SELECT output for products
+mysql> select * from products;
++----+--------------+--------+--------------------------+
+| id | product_name | price  | product_description      |
++----+--------------+--------+--------------------------+
+|  1 | Product A    |  30.00 | Description of Product A |
+|  2 | Product B    |  60.00 | Description of Product B |
+|  3 | Product C    |  40.00 | Description of Product C |
+|  4 | Product D    | 120.00 | Description of Product D |
++----+--------------+--------+--------------------------+
+4 rows in set (0.00 sec)
+
+-- Insert sample orders (using CURDATE() offsets to generate recent dates)
+
+INSERT INTO orders (customer_id, order_date, total_amount) VALUES
+(1, CURDATE() - INTERVAL 10 DAY, 90.00),
+(2, CURDATE() - INTERVAL 40 DAY, 200.00),
+(1, CURDATE() - INTERVAL 5 DAY, 150.00),
+(3, CURDATE() - INTERVAL 20 DAY, 300.00);
+
+-- Sample SELECT output for orders
+mysql> select * from orders;
++----+-------------+------------+--------------+
+| id | customer_id | order_date | total_amount |
++----+-------------+------------+--------------+
+|  1 |           1 | 2026-02-08 |        90.00 |
+|  2 |           2 | 2026-01-09 |       200.00 |
+|  3 |           1 | 2026-02-13 |       150.00 |
+|  4 |           3 | 2026-01-29 |       300.00 |
++----+-------------+------------+--------------+
+4 rows in set (0.00 sec)
